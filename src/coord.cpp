@@ -1,8 +1,6 @@
 #include "tornado.hpp"
-// #include "raylib-cpp.hpp"
 
 int main() {
-    // Initialize ENet
     if (enet_initialize() != 0) {
         std::cerr << "Failed to initialize ENet" << std::endl;
         return -1;
@@ -21,14 +19,6 @@ int main() {
     bool running = true;
     while (running) {
         coordinator.update();
-
-        // Optional: Add any additional coordinator-specific logic here
-        // For example, you might want to print statistics periodically
-        
-        // Handle shutdown gracefully
-        // if (WindowShouldClose()) { // If using raylib window
-        //     running = false;
-        // }
     }
 
     coordinator.shutdown();

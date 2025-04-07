@@ -1,3 +1,5 @@
+// Partial example code and images from Mika Pitts
+
 #include "raylib.h"
 #include <iostream>
 #include <string>

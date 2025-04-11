@@ -2,11 +2,11 @@
 #ifndef tornadoroll
 #define tornadoroll
 
+// Only external include user needs!
+#include <enet/enet.h>
+
 #include <algorithm>
 #include <cstdint>
-#include <enet/enet.h>
-// #include "raylib.h"
-// #include <raylib.hpp> 
 #include <iostream>
 #include <random>
 #include <string>
@@ -26,7 +26,8 @@
 #define MAX_PLAYERS 4
 #define sessionId_LENGTH 10
 #define DEFAULT_PORT 4848
-
+#define CLIENT_TIMEOUT 60000
+#define COORD_TIMEOUT 30000
 namespace tornado {
     template<typename T>
     struct NetworkData {
@@ -358,7 +359,7 @@ namespace tornado {
                 ENetEvent event;
                 auto start = std::chrono::steady_clock::now();
                 while (std::chrono::steady_clock::now() - start < std::chrono::seconds(5)) {
-                    while (enet_host_service(host, &event, 100) > 0) {
+                    while (enet_host_service(host, &event, CLIENT_TIMEOUT) > 0) {
                         if (event.type == ENET_EVENT_TYPE_CONNECT) {
                             connected = true;
                             return true;
@@ -427,7 +428,7 @@ namespace tornado {
             if (!initialized) return;
 
             ENetEvent event;
-            if (enet_host_service(server, &event, 1000) > 0) {
+            if (enet_host_service(server, &event, COORD_TIMEOUT) > 0) {
                 char ip[40];
 			    enet_address_get_host_ip(&event.peer->address, ip, sizeof(ip));
                 switch (event.type) {
@@ -783,7 +784,7 @@ namespace tornado {
             }
     
             ENetEvent event;
-            if (enet_host_service(self, &event, 5000) > 0 && 
+            if (enet_host_service(self, &event, CLIENT_TIMEOUT) > 0 && 
                 event.type == ENET_EVENT_TYPE_CONNECT) {
                 return true;
             }
@@ -799,7 +800,7 @@ namespace tornado {
             if (!initialized) return;
     
             ENetEvent event;
-            while (enet_host_service(self, &event, 0) > 0) {
+            while (enet_host_service(self, &event, CLIENT_TIMEOUT) > 0) {
                 switch (event.type) {
                     case ENET_EVENT_TYPE_CONNECT:
                         handleConnect(event);
@@ -811,6 +812,11 @@ namespace tornado {
                     case ENET_EVENT_TYPE_DISCONNECT:
                         handleDisconnect(event);
                         break;
+                    case ENET_EVENT_TYPE_NONE:
+                        std::cerr << "wuh oh";
+                        break;
+                    default:
+                        std::cerr << "Unknown or invalid event type occurred." << std::endl;
                 }
             }
         }
@@ -875,7 +881,6 @@ namespace tornado {
             }
         }
     
-        // Utility method implementations
         inline const std::vector<ENetPeer*>& Client::get_remote_peers() const { 
             return remote_peers; 
         }
@@ -910,7 +915,6 @@ namespace tornado {
             }
         }
     
-        // Private method implementations
         inline std::string Client::randomId(size_t length) {
             using std::chrono::high_resolution_clock;
             static thread_local std::mt19937 rng(
@@ -1055,7 +1059,7 @@ namespace tornado {
             }
         }
     
-    } // namespace tornado
+} // namespace tornado
     
 #endif // tornadoroll    
 

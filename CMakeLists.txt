@@ -18,15 +18,30 @@ if (NOT raylib_FOUND)
     endif()
 endif()
 
+# find_path(ENet_INCLUDE_DIRS "enet/enet.h" HINTS ${ENET_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
 if(WIN32)
     find_package(ENet CONFIG REQUIRED)
 else()
     find_package(PkgConfig REQUIRED)
-    pkg_check_modules(ENET REQUIRED libenet)
+    pkg_check_modules(ENET libenet)
+    if(NOT ENET_FOUND)
+        include(FetchContent)
+        FetchContent_Declare(
+            enet
+            GIT_REPOSITORY https://github.com/lsalzman/enet.git
+            GIT_TAG master
+        )
+        FetchContent_MakeAvailable(enet)
+        set(ENET_LIBRARIES enet)
+        set(ENET_INCLUDE_DIRS ${enet_SOURCE_DIR}/include)
+        # pkg_check_modules(ENET REQUIRED libenet)
+    endif()
     include_directories(${ENET_INCLUDE_DIRS})
 endif()
 
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/generated)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/certs)
 set(RESOURCE_FILES
     cat.png
     catb.png

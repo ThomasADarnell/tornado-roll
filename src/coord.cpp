@@ -6,7 +6,7 @@ int main() {
         return -1;
     }
 
-    tornado::Coordinator coordinator(4848);
+    tornado::Coordinator coordinator(4848, 4);
     
     if (!coordinator.initialize()) {
         std::cerr << "Failed to initialize coordinator" << std::endl;
